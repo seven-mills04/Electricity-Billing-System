@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.validation.constraints.*;
 
 @Entity
@@ -38,5 +38,6 @@ public class ElectricityConnection {
 
     @ManyToOne
     @JoinColumn(name = "consumer_id")
+    @JsonBackReference
     private Consumer consumer;
 }

@@ -8,26 +8,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 @RestController
-@RequestMapping("/bill")
+@RequestMapping("/api/bills")
+@CrossOrigin(origins = "http://localhost:5173")
 public class BillController {
 
     @Autowired
     private BillService billService;
 
     @GetMapping
-    public Page<Bill> getAllBills(Pageable pageable) {
-        return billService.getAllBills(pageable);
-    }
-
-    @GetMapping("/all")
     public List<Bill> getAllBills() {
         return billService.getAllBills();
     }
-
 
     @GetMapping("/{id}")
     public Bill getBillById(@PathVariable Long id) {
@@ -50,6 +42,7 @@ public class BillController {
             @RequestParam(required = false) BillStatus status,
             @RequestParam(required = false) Long consumerId,
             @RequestParam(required = false) String consumerNumber) {
+
         return billService.searchBills(month, status, consumerId, consumerNumber);
     }
 }

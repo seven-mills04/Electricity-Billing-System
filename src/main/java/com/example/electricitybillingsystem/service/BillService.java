@@ -36,11 +36,21 @@ public class BillService {
     public Bill generateBill(MeterReading meterReading) {
         log.info("Generating bill for meter reading id: {}", meterReading.getId());
 
-        Bill bill = new Bill();
+        Bill bill = billRepository
+                .findByMeterReadingId(meterReading.getId())
+                .orElse(new Bill());
 
-        bill.setBillNumber("BILL-" + UUID.randomUUID().toString().substring(0,8));
+        if (bill.getId() == null) {
+            bill.setBillNumber(
+                    "BILL-" + UUID.randomUUID().toString().substring(0, 8)
+            );
+        }
 
-        bill.setBillingMonth(YearMonth.now().toString());
+        bill.setBillingMonth(
+                YearMonth.from(
+                        meterReading.getReadingDate()
+                ).toString()
+        );
 
         bill.setBillDate(LocalDate.now());
 

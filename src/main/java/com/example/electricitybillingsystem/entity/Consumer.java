@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.*;
 import java.util.List;
 
@@ -38,5 +38,6 @@ public class Consumer {
     private String phone;
 
     @OneToMany(mappedBy = "consumer", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ElectricityConnection> connections;
 }
