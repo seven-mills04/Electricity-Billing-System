@@ -81,7 +81,7 @@ public class DataInitializer implements CommandLineRunner {
                 // Create User login credentials for the consumer
                 User user = User.builder()
                         .username(savedConsumer.getConsumerNumber().toLowerCase())
-                        .password(passwordEncoder.encode("password"))
+                        .password(passwordEncoder.encode(sha256("password")))
                         .role("ROLE_CONSUMER")
                         .consumer(savedConsumer)
                         .build();
@@ -162,12 +162,28 @@ public class DataInitializer implements CommandLineRunner {
             // Seed Admin User
             User admin = User.builder()
                     .username("admin")
-                    .password(passwordEncoder.encode("admin"))
+                    .password(passwordEncoder.encode(sha256("admin")))
                     .role("ROLE_ADMIN")
                     .build();
             userRepository.save(admin);
 
             System.out.println("Successfully seeded 50 consumers, connections, readings, bills, payments, and user credentials!");
+        }
+    }
+
+    private String sha256(String base) {
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 }
