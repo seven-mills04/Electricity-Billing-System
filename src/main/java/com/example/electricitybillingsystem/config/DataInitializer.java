@@ -43,14 +43,13 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        if (consumerRepository.count() < 50) {
-            // Delete all in correct dependency order to prevent constraint failures
-            paymentRepository.deleteAll();
-            billRepository.deleteAll();
-            meterReadingRepository.deleteAll();
-            connectionRepository.deleteAll();
-            userRepository.deleteAll();
-            consumerRepository.deleteAll();
+        if (consumerRepository.count() < 50 || userRepository.count() == 0) {
+            paymentRepository.deleteAllInBatch();
+            billRepository.deleteAllInBatch();
+            meterReadingRepository.deleteAllInBatch();
+            connectionRepository.deleteAllInBatch();
+            userRepository.deleteAllInBatch();
+            consumerRepository.deleteAllInBatch();
 
             String[] firstNames = {
                 "John", "Emma", "Michael", "Sophia", "William", "Olivia", "James", "Ava", "Oliver", "Isabella", 
