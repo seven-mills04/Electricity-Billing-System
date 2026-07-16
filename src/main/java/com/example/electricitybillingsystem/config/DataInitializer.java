@@ -5,6 +5,7 @@ import com.example.electricitybillingsystem.entity.enums.BillStatus;
 import com.example.electricitybillingsystem.entity.enums.PaymentMode;
 import com.example.electricitybillingsystem.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +21,23 @@ public class DataInitializer implements CommandLineRunner {
     private final MeterReadingRepository meterReadingRepository;
     private final BillRepository billRepository;
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(ConsumerRepository consumerRepository,
                            ElectricityConnectionRepository connectionRepository,
                            MeterReadingRepository meterReadingRepository,
                            BillRepository billRepository,
-                           PaymentRepository paymentRepository) {
+                           PaymentRepository paymentRepository,
+                           UserRepository userRepository,
+                           PasswordEncoder passwordEncoder) {
         this.consumerRepository = consumerRepository;
         this.connectionRepository = connectionRepository;
         this.meterReadingRepository = meterReadingRepository;
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -42,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
             billRepository.deleteAll();
             meterReadingRepository.deleteAll();
             connectionRepository.deleteAll();
+            userRepository.deleteAll();
             consumerRepository.deleteAll();
 
             String[] firstNames = {
@@ -70,6 +78,15 @@ public class DataInitializer implements CommandLineRunner {
                 consumer.setEmail(String.format("%s.%s@example.com", firstNames[i].toLowerCase(), lastNames[i].toLowerCase()));
                 consumer.setPhone(String.format("98765432%02d", 10 + (i % 90)));
                 Consumer savedConsumer = consumerRepository.save(consumer);
+                
+                // Create User login credentials for the consumer
+                User user = User.builder()
+                        .username(savedConsumer.getConsumerNumber().toLowerCase())
+                        .password(passwordEncoder.encode("password"))
+                        .role("ROLE_CONSUMER")
+                        .consumer(savedConsumer)
+                        .build();
+                userRepository.save(user);
                 
                 // 2. Create Electricity Connection
                 ElectricityConnection conn = new ElectricityConnection();
@@ -140,11 +157,18 @@ public class DataInitializer implements CommandLineRunner {
                         payment.setPaymentMode(mode);
                         
                         payment.setBill(savedBill);
-                        paymentRepository.save(payment);
                     }
                 }
             }
-            System.out.println("Successfully seeded 50 consumers, connections, readings, bills, and payments!");
+            // Seed Admin User
+            User admin = User.builder()
+                    .username("admin")
+                    .password(passwordEncoder.encode("admin"))
+                    .role("ROLE_ADMIN")
+                    .build();
+            userRepository.save(admin);
+
+            System.out.println("Successfully seeded 50 consumers, connections, readings, bills, payments, and user credentials!");
         }
     }
 }
