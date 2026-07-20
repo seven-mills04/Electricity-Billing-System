@@ -43,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        if (consumerRepository.count() < 50 || userRepository.count() == 0) {
+        if (paymentRepository.count() < 100 || consumerRepository.count() < 50 || userRepository.count() == 0) {
             paymentRepository.deleteAllInBatch();
             billRepository.deleteAllInBatch();
             meterReadingRepository.deleteAllInBatch();
@@ -81,7 +81,7 @@ public class DataInitializer implements CommandLineRunner {
                 // Create User login credentials for the consumer
                 User user = User.builder()
                         .username(savedConsumer.getConsumerNumber().toLowerCase())
-                        .password(passwordEncoder.encode(sha256("password")))
+                        .password(passwordEncoder.encode("password"))
                         .role("ROLE_CONSUMER")
                         .consumer(savedConsumer)
                         .build();
@@ -156,13 +156,14 @@ public class DataInitializer implements CommandLineRunner {
                         payment.setPaymentMode(mode);
                         
                         payment.setBill(savedBill);
+                        paymentRepository.save(payment);
                     }
                 }
             }
             // Seed Admin User
             User admin = User.builder()
                     .username("admin")
-                    .password(passwordEncoder.encode(sha256("admin")))
+                    .password(passwordEncoder.encode("admin"))
                     .role("ROLE_ADMIN")
                     .build();
             userRepository.save(admin);
