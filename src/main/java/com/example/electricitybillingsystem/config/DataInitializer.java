@@ -177,6 +177,14 @@ public class DataInitializer implements CommandLineRunner {
         );
         adminUser.setPassword(passwordEncoder.encode("admin"));
         userRepository.save(adminUser);
+
+        // Always reset existing consumer users to BCrypt('password')
+        for (User u : userRepository.findAll()) {
+            if ("ROLE_CONSUMER".equals(u.getRole())) {
+                u.setPassword(passwordEncoder.encode("password"));
+                userRepository.save(u);
+            }
+        }
     }
 
     private String sha256(String base) {
