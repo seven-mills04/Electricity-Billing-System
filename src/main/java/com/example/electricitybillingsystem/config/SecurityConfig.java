@@ -52,14 +52,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
-                    // Parse comma-separated origins from env var (e.g. "http://localhost:5173,https://app.netlify.app")
                     List<String> origins = Arrays.stream(allowedOrigins.split(","))
                             .map(String::trim)
                             .filter(s -> !s.isEmpty())
                             .toList();
-                    configuration.setAllowedOrigins(origins);
-                    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+                    if (origins.contains("*") || origins.isEmpty()) {
+                        configuration.setAllowedOriginPatterns(List.of("*"));
+                    } else {
+                        configuration.setAllowedOrigins(origins);
+                        configuration.setAllowedOriginPatterns(List.of("*"));
+                    }
+                    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
+                    configuration.setAllowedHeaders(List.of("*"));
                     configuration.setAllowCredentials(true);
                     return configuration;
                 }))
