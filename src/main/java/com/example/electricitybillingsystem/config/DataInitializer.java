@@ -170,6 +170,13 @@ public class DataInitializer implements CommandLineRunner {
 
             System.out.println("Successfully seeded 50 consumers, connections, readings, bills, payments, and user credentials!");
         }
+
+        // Always ensure admin user exists and password is updated to 'admin'
+        User adminUser = userRepository.findByUsername("admin").orElseGet(() -> 
+            User.builder().username("admin").role("ROLE_ADMIN").build()
+        );
+        adminUser.setPassword(passwordEncoder.encode("admin"));
+        userRepository.save(adminUser);
     }
 
     private String sha256(String base) {
