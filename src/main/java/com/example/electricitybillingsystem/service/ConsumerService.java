@@ -1,71 +1,102 @@
 package com.example.electricitybillingsystem.service;
 
+import com.example.electricitybillingsystem.dto.ConsumerCreateDTO;
+import com.example.electricitybillingsystem.dto.ConsumerDTO;
 import com.example.electricitybillingsystem.entity.Consumer;
-import com.example.electricitybillingsystem.repository.ConsumerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
+import com.example.electricitybillingsystem.exception.DuplicateResourceException;
 import com.example.electricitybillingsystem.exception.ResourceNotFoundException;
-import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.electricitybillingsystem.mapper.ConsumerMapper;
+import com.example.electricitybillingsystem.repository.ConsumerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 public class ConsumerService {
 
     private final ConsumerRepository consumerRepository;
+    private final ConsumerMapper consumerMapper;
 
-    public ConsumerService(ConsumerRepository consumerRepository) {
+    public ConsumerService(ConsumerRepository consumerRepository, ConsumerMapper consumerMapper) {
         this.consumerRepository = consumerRepository;
+        this.consumerMapper = consumerMapper;
     }
 
-    public Consumer saveConsumer(Consumer consumer) {
-        return consumerRepository.save(consumer);
+    @Transactional
+    public ConsumerDTO saveConsumer(ConsumerCreateDTO dto) {
+        log.info("Saving new consumer: {} {}", dto.getFirstName(), dto.getLastName());
+        
+        if (dto.getConsumerNumber() != null && consumerRepository.existsByConsumerNumber(dto.getConsumerNumber())) {
+            throw new DuplicateResourceException("Consumer number already exists: " + dto.getConsumerNumber());
+        }
+
+        Consumer consumer = consumerMapper.toEntity(dto);
+        Consumer savedConsumer = consumerRepository.save(consumer);
+        log.info("Successfully created consumer ID: {}", savedConsumer.getId());
+        return consumerMapper.toDTO(savedConsumer);
     }
+
     @Transactional(readOnly = true)
-    public Page<Consumer> getAllConsumers(Pageable pageable) {
-        return consumerRepository.findAll(pageable);
+    public Page<ConsumerDTO> getAllConsumers(Pageable pageable) {
+        return consumerRepository.findAll(pageable)
+                .map(consumerMapper::toDTO);
     }
 
-    public List<Consumer> getAllConsumers() {
-        return consumerRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<ConsumerDTO> getAllConsumers() {
+        return consumerRepository.findAll().stream()
+                .map(consumerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Consumer getConsumerById(Long id){
+    @Transactional(readOnly = true)
+    public ConsumerDTO getConsumerById(Long id) {
         return consumerRepository.findById(id)
+                .map(consumerMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Consumer not found with id: " + id));
     }
 
-    public Consumer updateConsumer(Long id,Consumer updatedConsumer){
-        Consumer existingConsumer = getConsumerById(id);
-        existingConsumer.setConsumerNumber(updatedConsumer.getConsumerNumber());
-        existingConsumer.setFirstName(updatedConsumer.getFirstName());
-        existingConsumer.setLastName(updatedConsumer.getLastName());
-        existingConsumer.setEmail(updatedConsumer.getEmail());
-        existingConsumer.setPhone(updatedConsumer.getPhone());
+    @Transactional
+    public ConsumerDTO updateConsumer(Long id, ConsumerCreateDTO updatedConsumerDto) {
+        log.info("Updating consumer ID: {}", id);
+        Consumer existingConsumer = consumerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Consumer not found with id: " + id));
 
-        consumerRepository.save(existingConsumer);
-
-        return existingConsumer;
+        consumerMapper.updateEntity(existingConsumer, updatedConsumerDto);
+        Consumer saved = consumerRepository.save(existingConsumer);
+        log.info("Successfully updated consumer ID: {}", id);
+        return consumerMapper.toDTO(saved);
     }
 
-    public void deleteConsumer(Long id){
+    @Transactional
+    public void deleteConsumer(Long id) {
+        log.info("Deleting consumer ID: {}", id);
         Consumer consumer = consumerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Consumer doesn't exist: " + id));
-        consumerRepository.deleteById(id);
+                .orElseThrow(() -> new ResourceNotFoundException("Consumer doesn't exist with id: " + id));
+        consumerRepository.delete(consumer);
+        log.info("Successfully deleted consumer ID: {}", id);
     }
 
-    public List<Consumer> searchConsumers(String name, String phone, String meterNumber) {
+    @Transactional(readOnly = true)
+    public List<ConsumerDTO> searchConsumers(String name, String phone, String meterNumber) {
+        List<Consumer> consumers;
         if (name != null && !name.trim().isEmpty()) {
-            return consumerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
+            consumers = consumerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
         } else if (phone != null && !phone.trim().isEmpty()) {
-            return consumerRepository.findByPhone(phone);
+            consumers = consumerRepository.findByPhone(phone);
         } else if (meterNumber != null && !meterNumber.trim().isEmpty()) {
-            return consumerRepository.findByMeterNumber(meterNumber);
+            consumers = consumerRepository.findByMeterNumber(meterNumber);
+        } else {
+            consumers = consumerRepository.findAll();
         }
-        return consumerRepository.findAll();
+        return consumers.stream()
+                .map(consumerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

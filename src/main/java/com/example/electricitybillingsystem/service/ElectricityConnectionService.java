@@ -1,54 +1,91 @@
 package com.example.electricitybillingsystem.service;
 
+import com.example.electricitybillingsystem.dto.ElectricityConnectionDTO;
+import com.example.electricitybillingsystem.dto.ElectricityConnectionRequestDTO;
+import com.example.electricitybillingsystem.entity.Consumer;
 import com.example.electricitybillingsystem.entity.ElectricityConnection;
+import com.example.electricitybillingsystem.exception.ResourceNotFoundException;
+import com.example.electricitybillingsystem.mapper.ElectricityConnectionMapper;
+import com.example.electricitybillingsystem.repository.ConsumerRepository;
 import com.example.electricitybillingsystem.repository.ElectricityConnectionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ElectricityConnectionService {
 
-    @Autowired
-    private ElectricityConnectionRepository electricityConnectionRepository;
+    private final ElectricityConnectionRepository electricityConnectionRepository;
+    private final ConsumerRepository consumerRepository;
+    private final ElectricityConnectionMapper connectionMapper;
 
-
-    public ElectricityConnection saveElectricityConnection(ElectricityConnection electricityConnection) {
-        return electricityConnectionRepository.save(electricityConnection);
+    public ElectricityConnectionService(ElectricityConnectionRepository electricityConnectionRepository,
+                                        ConsumerRepository consumerRepository,
+                                        ElectricityConnectionMapper connectionMapper) {
+        this.electricityConnectionRepository = electricityConnectionRepository;
+        this.consumerRepository = consumerRepository;
+        this.connectionMapper = connectionMapper;
     }
 
+    @Transactional
+    public ElectricityConnectionDTO saveElectricityConnection(ElectricityConnectionRequestDTO requestDTO) {
+        log.info("Saving new electricity connection: {}", requestDTO.getConnectionNumber());
 
-    public List<ElectricityConnection> getAllConnections() {
-        return electricityConnectionRepository.findAll();
+        Consumer consumer = null;
+        if (requestDTO.getConsumerId() != null) {
+            consumer = consumerRepository.findById(requestDTO.getConsumerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Consumer not found with id: " + requestDTO.getConsumerId()));
+        }
+
+        ElectricityConnection connection = connectionMapper.toEntity(requestDTO, consumer);
+        ElectricityConnection saved = electricityConnectionRepository.save(connection);
+        log.info("Successfully created connection ID: {}", saved.getId());
+        return connectionMapper.toDTO(saved);
     }
 
+    @Transactional(readOnly = true)
+    public List<ElectricityConnectionDTO> getAllConnections() {
+        return electricityConnectionRepository.findAll().stream()
+                .map(connectionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
-    public ElectricityConnection getConnectionById(Long id) {
+    @Transactional(readOnly = true)
+    public ElectricityConnectionDTO getConnectionById(Long id) {
         return electricityConnectionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Connection not found with id " + id));
+                .map(connectionMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Connection not found with id: " + id));
     }
 
-    public ElectricityConnection updateConnection(Long id, ElectricityConnection updatedConnection) {
+    @Transactional
+    public ElectricityConnectionDTO updateConnection(Long id, ElectricityConnectionRequestDTO updatedDTO) {
+        log.info("Updating electricity connection ID: {}", id);
 
-        ElectricityConnection connection = getConnectionById(id);
+        ElectricityConnection existing = electricityConnectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Connection not found with id: " + id));
 
-        connection.setConnectionNumber(updatedConnection.getConnectionNumber());
-        connection.setMeterNumber(updatedConnection.getMeterNumber());
-        connection.setConnectionType(updatedConnection.getConnectionType());
-        connection.setStatus(updatedConnection.getStatus());
-        connection.setSanctionedLoad(updatedConnection.getSanctionedLoad());
-        connection.setPhaseType(updatedConnection.getPhaseType());
-        connection.setConsumer(updatedConnection.getConsumer());
+        Consumer consumer = null;
+        if (updatedDTO.getConsumerId() != null) {
+            consumer = consumerRepository.findById(updatedDTO.getConsumerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Consumer not found with id: " + updatedDTO.getConsumerId()));
+        }
 
-        return electricityConnectionRepository.save(connection);
+        connectionMapper.updateEntity(existing, updatedDTO, consumer);
+        ElectricityConnection saved = electricityConnectionRepository.save(existing);
+        log.info("Successfully updated connection ID: {}", id);
+        return connectionMapper.toDTO(saved);
     }
 
-
+    @Transactional
     public void deleteConnection(Long id) {
-
-        ElectricityConnection connection = getConnectionById(id);
-
+        log.info("Deleting electricity connection ID: {}", id);
+        ElectricityConnection connection = electricityConnectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Connection not found with id: " + id));
         electricityConnectionRepository.delete(connection);
+        log.info("Successfully deleted connection ID: {}", id);
     }
 }

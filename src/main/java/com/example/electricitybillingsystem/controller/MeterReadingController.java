@@ -1,9 +1,9 @@
 package com.example.electricitybillingsystem.controller;
 
-import com.example.electricitybillingsystem.entity.MeterReading;
+import com.example.electricitybillingsystem.dto.MeterReadingDTO;
+import com.example.electricitybillingsystem.dto.MeterReadingRequestDTO;
 import com.example.electricitybillingsystem.service.MeterReadingService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,58 +14,56 @@ import java.util.List;
 @RequestMapping("/api/meter-readings")
 public class MeterReadingController {
 
-    @Autowired
-    private MeterReadingService meterReadingService;
+    private final MeterReadingService meterReadingService;
+
+    public MeterReadingController(MeterReadingService meterReadingService) {
+        this.meterReadingService = meterReadingService;
+    }
 
     @PostMapping
-    public ResponseEntity<MeterReading> saveMeterReading(
-            @Valid @RequestBody MeterReading meterReading) {
+    public ResponseEntity<MeterReadingDTO> saveMeterReading(
+            @Valid @RequestBody MeterReadingRequestDTO meterReading) {
 
-        MeterReading savedReading =
+        MeterReadingDTO savedReading =
                 meterReadingService.saveMeterReading(meterReading);
 
         return new ResponseEntity<>(savedReading, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<MeterReading>> getAllMeterReadings() {
+    public ResponseEntity<List<MeterReadingDTO>> getAllMeterReadings() {
 
-        List<MeterReading> readings =
+        List<MeterReadingDTO> readings =
                 meterReadingService.getAllMeterReadings();
 
-        return new ResponseEntity<>(readings, HttpStatus.OK);
+        return ResponseEntity.ok(readings);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MeterReading> getMeterReadingById(
-            @PathVariable Long id) {
+    public ResponseEntity<MeterReadingDTO> getMeterReadingById(@PathVariable Long id) {
 
-        MeterReading reading =
+        MeterReadingDTO reading =
                 meterReadingService.getMeterReadingById(id);
 
-        return new ResponseEntity<>(reading, HttpStatus.OK);
+        return ResponseEntity.ok(reading);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MeterReading> updateMeterReading(
+    public ResponseEntity<MeterReadingDTO> updateMeterReading(
             @PathVariable Long id,
-            @Valid @RequestBody MeterReading meterReading) {
+            @Valid @RequestBody MeterReadingRequestDTO meterReading) {
 
-        MeterReading updatedReading =
+        MeterReadingDTO updatedReading =
                 meterReadingService.updateMeterReading(id, meterReading);
 
-        return new ResponseEntity<>(updatedReading, HttpStatus.OK);
+        return ResponseEntity.ok(updatedReading);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMeterReading(
-            @PathVariable Long id) {
+    public ResponseEntity<String> deleteMeterReading(@PathVariable Long id) {
 
         meterReadingService.deleteMeterReading(id);
 
-        return new ResponseEntity<>(
-                "Meter Reading deleted successfully",
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok("Meter Reading deleted successfully");
     }
 }
