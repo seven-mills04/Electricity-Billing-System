@@ -77,8 +77,7 @@ public class DataInitializer implements CommandLineRunner {
                 consumer.setEmail(String.format("%s.%s@example.com", firstNames[i].toLowerCase(), lastNames[i].toLowerCase()));
                 consumer.setPhone(String.format("98765432%02d", 10 + (i % 90)));
                 Consumer savedConsumer = consumerRepository.save(consumer);
-                
-                // Create User login credentials for the consumer
+
                 User user = User.builder()
                         .username(savedConsumer.getConsumerNumber().toLowerCase())
                         .password(passwordEncoder.encode("password"))
@@ -87,7 +86,7 @@ public class DataInitializer implements CommandLineRunner {
                         .build();
                 userRepository.save(user);
                 
-                // 2. Create Electricity Connection
+
                 ElectricityConnection conn = new ElectricityConnection();
                 conn.setConnectionNumber(String.format("CON%04d", 1001 + i));
                 conn.setMeterNumber(String.format("MET%05d", 20000 + i));
@@ -97,15 +96,13 @@ public class DataInitializer implements CommandLineRunner {
                 conn.setPhaseType(i % 3 == 0 ? "THREE_PHASE" : "SINGLE_PHASE");
                 conn.setConsumer(savedConsumer);
                 ElectricityConnection savedConn = connectionRepository.save(conn);
-                
-                // 3. Create historical readings, bills, and payments for Jan - Jun 2026
+
                 int lastReadingValue = 100;
                 for (int monthIdx = 1; monthIdx <= 6; monthIdx++) {
                     LocalDate readingDate = LocalDate.of(2026, monthIdx, 15);
                     int consumed = 150 + random.nextInt(300); // 150 - 450 kWh
                     int currentReadingValue = lastReadingValue + consumed;
 
-                    // Save Reading
                     MeterReading mr = new MeterReading();
                     mr.setConnection(savedConn);
                     mr.setReadingDate(readingDate);
@@ -119,7 +116,6 @@ public class DataInitializer implements CommandLineRunner {
                     
                     lastReadingValue = currentReadingValue;
 
-                    // Calculate rates
                     BigDecimal units = BigDecimal.valueOf(consumed);
                     BigDecimal fixed = BigDecimal.valueOf(120.00);
                     BigDecimal energy = units.multiply(BigDecimal.valueOf(6.50));
@@ -137,21 +133,18 @@ public class DataInitializer implements CommandLineRunner {
                     bill.setFixedCharge(fixed);
                     bill.setElectricityDuty(duty);
                     bill.setTotalAmount(total);
-                    
-                    // The last bill (June) might be unpaid for some consumers, earlier bills are paid
+
                     BillStatus status = (monthIdx == 6 && i % 3 == 0) ? BillStatus.UNPAID : BillStatus.PAID;
                     bill.setBillStatus(status);
                     bill.setMeterReading(savedMr);
                     Bill savedBill = billRepository.save(bill);
 
-                    // If bill is paid, create a Payment record
                     if (status == BillStatus.PAID) {
                         Payment payment = new Payment();
                         payment.setTransactionId(String.format("TXN%06d%02d", 900000 + i, monthIdx));
                         payment.setAmountPaid(total);
                         payment.setPaymentDate(readingDate.plusDays(5));
-                        
-                        // Select a random payment mode
+
                         PaymentMode mode = PaymentMode.values()[i % PaymentMode.values().length];
                         payment.setPaymentMode(mode);
                         
@@ -160,7 +153,7 @@ public class DataInitializer implements CommandLineRunner {
                     }
                 }
             }
-            // Seed Admin User
+
             User admin = User.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("admin"))
@@ -171,14 +164,12 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Successfully seeded 50 consumers, connections, readings, bills, payments, and user credentials!");
         }
 
-        // Always ensure admin user exists and password is updated to 'admin'
         User adminUser = userRepository.findByUsername("admin").orElseGet(() -> 
             User.builder().username("admin").role("ROLE_ADMIN").build()
         );
         adminUser.setPassword(passwordEncoder.encode("admin"));
         userRepository.save(adminUser);
 
-        // Always reset existing consumer users to BCrypt('password')
         for (User u : userRepository.findAll()) {
             if ("ROLE_CONSUMER".equals(u.getRole())) {
                 u.setPassword(passwordEncoder.encode("password"));

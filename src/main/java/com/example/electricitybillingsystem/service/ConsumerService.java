@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.example.electricitybillingsystem.exception.ResourceNotFoundException;
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,7 +25,7 @@ public class ConsumerService {
     public Consumer saveConsumer(Consumer consumer) {
         return consumerRepository.save(consumer);
     }
-
+    @Transactional(readOnly = true)
     public Page<Consumer> getAllConsumers(Pageable pageable) {
         return consumerRepository.findAll(pageable);
     }
