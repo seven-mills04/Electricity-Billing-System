@@ -43,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        if (paymentRepository.count() < 100 || consumerRepository.count() < 50 || userRepository.count() == 0) {
+        if (paymentRepository.sumMonthlyRevenue().compareTo(BigDecimal.ZERO) == 0 || paymentRepository.count() < 100 || consumerRepository.count() < 50 || userRepository.count() == 0) {
             paymentRepository.deleteAllInBatch();
             billRepository.deleteAllInBatch();
             meterReadingRepository.deleteAllInBatch();
@@ -98,8 +98,10 @@ public class DataInitializer implements CommandLineRunner {
                 ElectricityConnection savedConn = connectionRepository.save(conn);
 
                 int lastReadingValue = 100;
-                for (int monthIdx = 1; monthIdx <= 6; monthIdx++) {
-                    LocalDate readingDate = LocalDate.of(2026, monthIdx, 15);
+                int currentMonth = LocalDate.now().getMonthValue();
+                int currentYear = LocalDate.now().getYear();
+                for (int monthIdx = 1; monthIdx <= currentMonth; monthIdx++) {
+                    LocalDate readingDate = LocalDate.of(currentYear, monthIdx, 15);
                     int consumed = 150 + random.nextInt(300); // 150 - 450 kWh
                     int currentReadingValue = lastReadingValue + consumed;
 
@@ -125,7 +127,7 @@ public class DataInitializer implements CommandLineRunner {
                     // Save Bill
                     Bill bill = new Bill();
                     bill.setBillNumber(String.format("BIL%04d%02d", 1001 + i, monthIdx));
-                    bill.setBillingMonth(readingDate.getMonth().toString() + " 2026");
+                    bill.setBillingMonth(readingDate.getMonth().toString() + " " + currentYear);
                     bill.setBillDate(readingDate.plusDays(2));
                     bill.setDueDate(readingDate.plusDays(17));
                     bill.setUnitsConsumed(units);
@@ -134,7 +136,7 @@ public class DataInitializer implements CommandLineRunner {
                     bill.setElectricityDuty(duty);
                     bill.setTotalAmount(total);
 
-                    BillStatus status = (monthIdx == 6 && i % 3 == 0) ? BillStatus.UNPAID : BillStatus.PAID;
+                    BillStatus status = (monthIdx == currentMonth && i % 3 == 0) ? BillStatus.UNPAID : BillStatus.PAID;
                     bill.setBillStatus(status);
                     bill.setMeterReading(savedMr);
                     Bill savedBill = billRepository.save(bill);
