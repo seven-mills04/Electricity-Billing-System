@@ -18,4 +18,5 @@ public class ElectricityConnectionDTO {
     private Double sanctionedLoad;
     private String phaseType;
     private Long consumerId;
+    private ConsumerDTO consumer;
 }

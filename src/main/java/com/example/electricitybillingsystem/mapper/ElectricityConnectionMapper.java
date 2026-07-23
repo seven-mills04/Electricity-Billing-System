@@ -1,5 +1,6 @@
 package com.example.electricitybillingsystem.mapper;
 
+import com.example.electricitybillingsystem.dto.ConsumerDTO;
 import com.example.electricitybillingsystem.dto.ElectricityConnectionDTO;
 import com.example.electricitybillingsystem.dto.ElectricityConnectionRequestDTO;
 import com.example.electricitybillingsystem.entity.Consumer;
@@ -14,6 +15,19 @@ public class ElectricityConnectionMapper {
             return null;
         }
 
+        Consumer consumer = entity.getConsumer();
+        ConsumerDTO consumerDTO = null;
+        if (consumer != null) {
+            consumerDTO = ConsumerDTO.builder()
+                    .id(consumer.getId())
+                    .consumerNumber(consumer.getConsumerNumber())
+                    .firstName(consumer.getFirstName())
+                    .lastName(consumer.getLastName())
+                    .email(consumer.getEmail())
+                    .phone(consumer.getPhone())
+                    .build();
+        }
+
         return ElectricityConnectionDTO.builder()
                 .id(entity.getId())
                 .connectionNumber(entity.getConnectionNumber())
@@ -22,7 +36,8 @@ public class ElectricityConnectionMapper {
                 .status(entity.getStatus())
                 .sanctionedLoad(entity.getSanctionedLoad())
                 .phaseType(entity.getPhaseType())
-                .consumerId(entity.getConsumer() != null ? entity.getConsumer().getId() : null)
+                .consumerId(consumer != null ? consumer.getId() : null)
+                .consumer(consumerDTO)
                 .build();
     }
 
