@@ -17,11 +17,11 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestController("portalConsumerController")
+@RestController
 @RequestMapping("/api/consumer")
 @PreAuthorize("hasRole('CONSUMER')")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-public class ConsumerController {
+public class ConsumerDashboardController {
 
     private final UserRepository userRepository;
     private final BillRepository billRepository;
@@ -33,14 +33,14 @@ public class ConsumerController {
     private final PaymentMapper paymentMapper;
     private final MeterReadingMapper meterReadingMapper;
 
-    public ConsumerController(UserRepository userRepository,
-                              BillRepository billRepository,
-                              PaymentRepository paymentRepository,
-                              MeterReadingRepository meterReadingRepository,
-                              ConsumerMapper consumerMapper,
-                              BillMapper billMapper,
-                              PaymentMapper paymentMapper,
-                              MeterReadingMapper meterReadingMapper) {
+    public ConsumerDashboardController(UserRepository userRepository,
+                                       BillRepository billRepository,
+                                       PaymentRepository paymentRepository,
+                                       MeterReadingRepository meterReadingRepository,
+                                       ConsumerMapper consumerMapper,
+                                       BillMapper billMapper,
+                                       PaymentMapper paymentMapper,
+                                       MeterReadingMapper meterReadingMapper) {
         this.userRepository = userRepository;
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
