@@ -51,6 +51,12 @@ public class ConsumerDashboardController {
         this.meterReadingMapper = meterReadingMapper;
     }
 
+    @GetMapping("/ping")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
     private Consumer getAuthenticatedConsumer(Principal principal) {
         if (principal == null) {
             throw new UsernameNotFoundException("Principal is null");
