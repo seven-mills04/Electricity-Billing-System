@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class ElectricityConnectionController {
         return new ResponseEntity<>(savedConnection, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ElectricityConnectionDTO>> getAllConnections() {
 
@@ -39,6 +41,7 @@ public class ElectricityConnectionController {
         return ResponseEntity.ok(connections);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ElectricityConnectionDTO> getConnectionById(@PathVariable Long id) {
 
@@ -48,6 +51,7 @@ public class ElectricityConnectionController {
         return ResponseEntity.ok(connection);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ElectricityConnectionDTO> updateConnection(
             @PathVariable Long id,
@@ -59,6 +63,7 @@ public class ElectricityConnectionController {
         return ResponseEntity.ok(connection);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteConnection(@PathVariable Long id) {
 

@@ -16,10 +16,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // 256-bit key for HMAC-SHA
+    
     private static final String SECRET_KEY = "amF2YS1zcHJpbmctYm9vdC1lbGVjdHJpY2l0eS1iaWxsaW5nLXN5c3RlbS1qd3Qtc2VjcmV0LWtleS1taW5pbXVtLTI1Ni1iaXQ=";
     
-    // Token valid for 24 hours
+    
     private static final long JWT_EXPIRATION = 86400000;
 
     private Key getSigningKey() {

@@ -5,11 +5,13 @@ import com.example.electricitybillingsystem.entity.enums.BillStatus;
 import com.example.electricitybillingsystem.service.BillService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/bills")
+@PreAuthorize("hasRole('ADMIN')")
 public class BillController {
 
     private final BillService billService;

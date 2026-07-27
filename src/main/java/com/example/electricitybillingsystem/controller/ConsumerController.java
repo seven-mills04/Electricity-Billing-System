@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -28,18 +29,21 @@ public class ConsumerController {
         return new ResponseEntity<>(savedConsumer, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<ConsumerDTO>> getAllConsumers(Pageable pageable) {
         Page<ConsumerDTO> consumers = consumerService.getAllConsumers(pageable);
         return ResponseEntity.ok(consumers);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ConsumerDTO> getConsumerById(@PathVariable Long id) {
         ConsumerDTO consumer = consumerService.getConsumerById(id);
         return ResponseEntity.ok(consumer);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ConsumerDTO> updateConsumer(@PathVariable Long id,
                                                         @Valid @RequestBody ConsumerCreateDTO updatedConsumer) {
@@ -47,12 +51,14 @@ public class ConsumerController {
         return ResponseEntity.ok(consumer);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteConsumer(@PathVariable Long id) {
         consumerService.deleteConsumer(id);
         return ResponseEntity.ok("Consumer Deleted Successfully");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<List<ConsumerDTO>> searchConsumers(
             @RequestParam(required = false) String name,

@@ -69,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
             Random random = new Random();
 
             for (int i = 0; i < 50; i++) {
-                // 1. Create Consumer
+                
                 Consumer consumer = new Consumer();
                 consumer.setConsumerNumber(String.format("CON%04d", 1001 + i));
                 consumer.setFirstName(firstNames[i]);
@@ -102,7 +102,7 @@ public class DataInitializer implements CommandLineRunner {
                 int currentYear = LocalDate.now().getYear();
                 for (int monthIdx = 1; monthIdx <= currentMonth; monthIdx++) {
                     LocalDate readingDate = LocalDate.of(currentYear, monthIdx, 15);
-                    int consumed = 150 + random.nextInt(300); // 150 - 450 kWh
+                    int consumed = 150 + random.nextInt(300); 
                     int currentReadingValue = lastReadingValue + consumed;
 
                     MeterReading mr = new MeterReading();
@@ -121,10 +121,10 @@ public class DataInitializer implements CommandLineRunner {
                     BigDecimal units = BigDecimal.valueOf(consumed);
                     BigDecimal fixed = BigDecimal.valueOf(120.00);
                     BigDecimal energy = units.multiply(BigDecimal.valueOf(6.50));
-                    BigDecimal duty = energy.multiply(BigDecimal.valueOf(0.05)); // 5% tax
+                    BigDecimal duty = energy.multiply(BigDecimal.valueOf(0.05)); 
                     BigDecimal total = fixed.add(energy).add(duty);
 
-                    // Save Bill
+                    
                     Bill bill = new Bill();
                     bill.setBillNumber(String.format("BIL%04d%02d", 1001 + i, monthIdx));
                     bill.setBillingMonth(readingDate.getMonth().toString() + " " + currentYear);

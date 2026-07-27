@@ -10,6 +10,13 @@ import com.example.electricitybillingsystem.exception.ResourceNotFoundException;
 import com.example.electricitybillingsystem.mapper.PaymentMapper;
 import com.example.electricitybillingsystem.repository.BillRepository;
 import com.example.electricitybillingsystem.repository.PaymentRepository;
+import com.example.electricitybillingsystem.repository.UserRepository;
+import com.example.electricitybillingsystem.entity.User;
+import com.example.electricitybillingsystem.entity.Consumer;
+import com.example.electricitybillingsystem.entity.ElectricityConnection;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,21 +35,43 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final BillRepository billRepository;
     private final PaymentMapper paymentMapper;
+    private final UserRepository userRepository;
 
     public PaymentService(PaymentRepository paymentRepository,
                           BillRepository billRepository,
-                          PaymentMapper paymentMapper) {
+                          PaymentMapper paymentMapper,
+                          UserRepository userRepository) {
         this.paymentRepository = paymentRepository;
         this.billRepository = billRepository;
         this.paymentMapper = paymentMapper;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public PaymentDTO payBill(Long billId, PaymentRequestDTO request) {
-        log.info("Processing payment for bill ID: {} with mode: {}", billId, request.getPaymentMode());
+    public PaymentDTO payBill(Long billId, PaymentRequestDTO request, String username) {
+        log.info("Processing payment for bill ID: {} by user: {} with mode: {}", billId, username, request.getPaymentMode());
 
         Bill bill = billRepository.findById(billId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bill not found with id: " + billId));
+
+        if (username != null) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+            if ("ROLE_CONSUMER".equals(user.getRole())) {
+                Consumer consumer = user.getConsumer();
+                if (consumer == null) {
+                    throw new IllegalArgumentException("User not associated with a consumer profile.");
+                }
+                List<String> connectionNumbers = consumer.getConnections().stream()
+                        .map(ElectricityConnection::getConnectionNumber)
+                        .collect(Collectors.toList());
+                if (bill.getMeterReading() == null ||
+                    bill.getMeterReading().getConnection() == null ||
+                    !connectionNumbers.contains(bill.getMeterReading().getConnection().getConnectionNumber())) {
+                    throw new AccessDeniedException("Access denied: You cannot pay a bill belonging to another connection.");
+                }
+            }
+        }
 
         if (bill.getBillStatus() == BillStatus.PAID) {
             throw new BillAlreadyPaidException("Bill is already paid");

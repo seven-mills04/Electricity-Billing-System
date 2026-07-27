@@ -68,7 +68,7 @@ public class DashboardService {
                     .collect(Collectors.toList());
         }
 
-        // Group readings by Month (normalized to 1st of month)
+        
         Map<LocalDate, Double> monthlyConsumptions = new TreeMap<>();
         for (MeterReading mr : readings) {
             if (mr.getReadingDate() == null) continue;
@@ -80,7 +80,7 @@ public class DashboardService {
         List<Map.Entry<LocalDate, Double>> sortedEntries = new ArrayList<>(monthlyConsumptions.entrySet());
 
         double slope = 0;
-        double intercept = 250.0; // default average fallback
+        double intercept = 250.0; 
         int n = sortedEntries.size();
 
         if (n >= 2) {

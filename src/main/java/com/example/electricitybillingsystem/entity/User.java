@@ -28,7 +28,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String role; // "ROLE_ADMIN" or "ROLE_CONSUMER"
+    private String role; 
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "consumer_id")

@@ -18,7 +18,7 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private String role; // "ROLE_ADMIN" or "ROLE_CONSUMER"
+    private String role; 
 
-    private Long consumerId; // optional consumer link
+    private Long consumerId; 
 }
