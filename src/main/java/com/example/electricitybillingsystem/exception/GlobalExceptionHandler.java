@@ -97,6 +97,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({
+        org.springframework.web.servlet.resource.NoResourceFoundException.class,
+        org.springframework.web.servlet.NoHandlerFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNoHandlerOrResourceFound(Exception ex, HttpServletRequest request) {
+        log.error("Endpoint or resource not found: {}", ex.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception occurred: ", ex);
