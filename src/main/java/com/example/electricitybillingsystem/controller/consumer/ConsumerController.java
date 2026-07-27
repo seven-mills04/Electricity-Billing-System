@@ -1,4 +1,4 @@
-package com.example.electricitybillingsystem.controller;
+package com.example.electricitybillingsystem.controller.consumer;
 
 import com.example.electricitybillingsystem.dto.*;
 import com.example.electricitybillingsystem.entity.*;
@@ -17,11 +17,11 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestController
+@RestController("portalConsumerController")
 @RequestMapping("/api/consumer")
 @PreAuthorize("hasRole('CONSUMER')")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-public class ConsumerPortalController {
+public class ConsumerController {
 
     private final UserRepository userRepository;
     private final BillRepository billRepository;
@@ -33,14 +33,14 @@ public class ConsumerPortalController {
     private final PaymentMapper paymentMapper;
     private final MeterReadingMapper meterReadingMapper;
 
-    public ConsumerPortalController(UserRepository userRepository,
-                                    BillRepository billRepository,
-                                    PaymentRepository paymentRepository,
-                                    MeterReadingRepository meterReadingRepository,
-                                    ConsumerMapper consumerMapper,
-                                    BillMapper billMapper,
-                                    PaymentMapper paymentMapper,
-                                    MeterReadingMapper meterReadingMapper) {
+    public ConsumerController(UserRepository userRepository,
+                              BillRepository billRepository,
+                              PaymentRepository paymentRepository,
+                              MeterReadingRepository meterReadingRepository,
+                              ConsumerMapper consumerMapper,
+                              BillMapper billMapper,
+                              PaymentMapper paymentMapper,
+                              MeterReadingMapper meterReadingMapper) {
         this.userRepository = userRepository;
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
