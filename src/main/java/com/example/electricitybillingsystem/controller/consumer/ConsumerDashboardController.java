@@ -27,6 +27,7 @@ public class ConsumerDashboardController {
     private final BillRepository billRepository;
     private final PaymentRepository paymentRepository;
     private final MeterReadingRepository meterReadingRepository;
+    private final ElectricityConnectionRepository connectionRepository;
     
     private final ConsumerMapper consumerMapper;
     private final BillMapper billMapper;
@@ -37,6 +38,7 @@ public class ConsumerDashboardController {
                                        BillRepository billRepository,
                                        PaymentRepository paymentRepository,
                                        MeterReadingRepository meterReadingRepository,
+                                       ElectricityConnectionRepository connectionRepository,
                                        ConsumerMapper consumerMapper,
                                        BillMapper billMapper,
                                        PaymentMapper paymentMapper,
@@ -45,6 +47,7 @@ public class ConsumerDashboardController {
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
         this.meterReadingRepository = meterReadingRepository;
+        this.connectionRepository = connectionRepository;
         this.consumerMapper = consumerMapper;
         this.billMapper = billMapper;
         this.paymentMapper = paymentMapper;
@@ -80,7 +83,8 @@ public class ConsumerDashboardController {
     @GetMapping("/bills")
     public ResponseEntity<List<BillDTO>> getConsumerBills(Principal principal) {
         Consumer consumer = getAuthenticatedConsumer(principal);
-        List<String> connectionNumbers = consumer.getConnections().stream()
+        List<ElectricityConnection> conns = connectionRepository.findByConsumerId(consumer.getId());
+        List<String> connectionNumbers = conns.stream()
                 .map(ElectricityConnection::getConnectionNumber)
                 .collect(Collectors.toList());
 
@@ -100,7 +104,8 @@ public class ConsumerDashboardController {
     @GetMapping("/payments")
     public ResponseEntity<List<PaymentDTO>> getConsumerPayments(Principal principal) {
         Consumer consumer = getAuthenticatedConsumer(principal);
-        List<String> connectionNumbers = consumer.getConnections().stream()
+        List<ElectricityConnection> conns = connectionRepository.findByConsumerId(consumer.getId());
+        List<String> connectionNumbers = conns.stream()
                 .map(ElectricityConnection::getConnectionNumber)
                 .collect(Collectors.toList());
 
@@ -121,7 +126,8 @@ public class ConsumerDashboardController {
     @GetMapping("/meter-readings")
     public ResponseEntity<List<MeterReadingDTO>> getConsumerMeterReadings(Principal principal) {
         Consumer consumer = getAuthenticatedConsumer(principal);
-        List<String> connectionNumbers = consumer.getConnections().stream()
+        List<ElectricityConnection> conns = connectionRepository.findByConsumerId(consumer.getId());
+        List<String> connectionNumbers = conns.stream()
                 .map(ElectricityConnection::getConnectionNumber)
                 .collect(Collectors.toList());
 
@@ -140,18 +146,19 @@ public class ConsumerDashboardController {
     @GetMapping("/dashboard")
     public ResponseEntity<ConsumerDashboardDTO> getDashboard(Principal principal) {
         Consumer consumer = getAuthenticatedConsumer(principal);
+        List<ElectricityConnection> conns = connectionRepository.findByConsumerId(consumer.getId());
         
-        ElectricityConnection activeConn = consumer.getConnections().stream()
+        ElectricityConnection activeConn = conns.stream()
                 .filter(c -> "ACTIVE".equalsIgnoreCase(c.getStatus()))
                 .findFirst()
-                .orElse(consumer.getConnections().isEmpty() ? null : consumer.getConnections().get(0));
+                .orElse(conns.isEmpty() ? null : conns.get(0));
 
         String connNumber = activeConn != null ? activeConn.getConnectionNumber() : "N/A";
         String meterNumber = activeConn != null ? activeConn.getMeterNumber() : "N/A";
         String connType = activeConn != null ? activeConn.getConnectionType() : "N/A";
         String status = activeConn != null ? activeConn.getStatus() : "INACTIVE";
 
-        List<String> connectionNumbers = consumer.getConnections().stream()
+        List<String> connectionNumbers = conns.stream()
                 .map(ElectricityConnection::getConnectionNumber)
                 .collect(Collectors.toList());
 

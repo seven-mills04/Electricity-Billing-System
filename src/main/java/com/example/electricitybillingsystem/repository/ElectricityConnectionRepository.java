@@ -21,4 +21,5 @@ public interface ElectricityConnectionRepository extends JpaRepository<Electrici
 
     Optional<ElectricityConnection> findByConnectionNumber(String connectionNumber);
     Optional<ElectricityConnection> findByMeterNumber(String meterNumber);
+    List<ElectricityConnection> findByConsumerId(Long consumerId);
 }
