@@ -3,10 +3,12 @@ package com.example.electricitybillingsystem.service;
 import com.example.electricitybillingsystem.dto.ConsumerCreateDTO;
 import com.example.electricitybillingsystem.dto.ConsumerDTO;
 import com.example.electricitybillingsystem.entity.Consumer;
+import com.example.electricitybillingsystem.entity.User;
 import com.example.electricitybillingsystem.exception.DuplicateResourceException;
 import com.example.electricitybillingsystem.exception.ResourceNotFoundException;
 import com.example.electricitybillingsystem.mapper.ConsumerMapper;
 import com.example.electricitybillingsystem.repository.ConsumerRepository;
+import com.example.electricitybillingsystem.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +23,27 @@ import java.util.stream.Collectors;
 public class ConsumerService {
 
     private final ConsumerRepository consumerRepository;
+    private final UserRepository userRepository;
     private final ConsumerMapper consumerMapper;
 
-    public ConsumerService(ConsumerRepository consumerRepository, ConsumerMapper consumerMapper) {
+    public ConsumerService(ConsumerRepository consumerRepository, UserRepository userRepository, ConsumerMapper consumerMapper) {
         this.consumerRepository = consumerRepository;
+        this.userRepository = userRepository;
         this.consumerMapper = consumerMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public ConsumerDTO getConsumerProfileByUsername(String username) {
+        log.info("Fetching consumer profile for username: {}", username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        Consumer consumer = user.getConsumer();
+        if (consumer == null) {
+            throw new ResourceNotFoundException("No consumer profile associated with username: " + username);
+        }
+
+        return consumerMapper.toDTO(consumer);
     }
 
     @Transactional

@@ -17,6 +17,8 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.electricitybillingsystem.service.ConsumerService;
+
 @RestController
 @RequestMapping("/api/consumer")
 @PreAuthorize("hasRole('CONSUMER')")
@@ -28,6 +30,7 @@ public class ConsumerDashboardController {
     private final PaymentRepository paymentRepository;
     private final MeterReadingRepository meterReadingRepository;
     private final ElectricityConnectionRepository connectionRepository;
+    private final ConsumerService consumerService;
     
     private final ConsumerMapper consumerMapper;
     private final BillMapper billMapper;
@@ -39,6 +42,7 @@ public class ConsumerDashboardController {
                                        PaymentRepository paymentRepository,
                                        MeterReadingRepository meterReadingRepository,
                                        ElectricityConnectionRepository connectionRepository,
+                                       ConsumerService consumerService,
                                        ConsumerMapper consumerMapper,
                                        BillMapper billMapper,
                                        PaymentMapper paymentMapper,
@@ -48,6 +52,7 @@ public class ConsumerDashboardController {
         this.paymentRepository = paymentRepository;
         this.meterReadingRepository = meterReadingRepository;
         this.connectionRepository = connectionRepository;
+        this.consumerService = consumerService;
         this.consumerMapper = consumerMapper;
         this.billMapper = billMapper;
         this.paymentMapper = paymentMapper;
@@ -76,8 +81,11 @@ public class ConsumerDashboardController {
 
     @GetMapping("/profile")
     public ResponseEntity<ConsumerDTO> getProfile(Principal principal) {
-        Consumer consumer = getAuthenticatedConsumer(principal);
-        return ResponseEntity.ok(consumerMapper.toDTO(consumer));
+        if (principal == null) {
+            throw new UsernameNotFoundException("Principal is null");
+        }
+        ConsumerDTO profile = consumerService.getConsumerProfileByUsername(principal.getName());
+        return ResponseEntity.ok(profile);
     }
 
     @GetMapping("/bills")

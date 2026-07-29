@@ -40,6 +40,7 @@ public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
     @Query("SELECT c FROM Consumer c JOIN c.connections ec WHERE ec.meterNumber = :meterNumber")
     List<Consumer> findByMeterNumber(@Param("meterNumber") String meterNumber);
 
+    @EntityGraph(attributePaths = {"connections"})
     Optional<Consumer> findByConsumerNumber(String consumerNumber);
     boolean existsByConsumerNumber(String consumerNumber);
     boolean existsByEmail(String email);

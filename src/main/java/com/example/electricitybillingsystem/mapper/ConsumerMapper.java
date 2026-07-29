@@ -3,6 +3,7 @@ package com.example.electricitybillingsystem.mapper;
 import com.example.electricitybillingsystem.dto.ConsumerCreateDTO;
 import com.example.electricitybillingsystem.dto.ConsumerDTO;
 import com.example.electricitybillingsystem.entity.Consumer;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -22,6 +23,8 @@ public class ConsumerMapper {
             return null;
         }
 
+        boolean connectionsLoaded = Hibernate.isInitialized(entity.getConnections()) && entity.getConnections() != null;
+
         return ConsumerDTO.builder()
                 .id(entity.getId())
                 .consumerNumber(entity.getConsumerNumber())
@@ -29,7 +32,7 @@ public class ConsumerMapper {
                 .lastName(entity.getLastName())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
-                .connections(entity.getConnections() != null
+                .connections(connectionsLoaded
                         ? entity.getConnections().stream()
                         .map(connectionMapper::toDTO)
                         .collect(Collectors.toList())
