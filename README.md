@@ -171,20 +171,47 @@ The system automatically calculates electricity bills based on:
 
 ---
 
-# 📷 Screenshots
+## 📸 Screenshots
 
-> Add screenshots here after uploading them.
+### 🏠 Landing Page
 
-Example:
+![Landing Page] <img width="1119" height="608" alt="Screenshot 2026-08-04 125507" src="https://github.com/user-attachments/assets/e9d0d52b-40b9-4e8c-8307-5940251da1a2" />
 
-```
-screenshots/
-    dashboard.png
-    consumer-management.png
-    meter-reading.png
-    billing.png
-    payments.png
-```
+
+---
+
+### 📊 Admin Dashboard
+
+![Admin Dashboard] <img width="1119" height="605" alt="image" src="https://github.com/user-attachments/assets/672ae72f-8759-4ed6-a9bc-4d9aa3c2c3dd" />
+
+
+---
+
+### 👥 Consumer Management
+
+![Consumer Management]  <img width="1119" height="613" alt="image" src="https://github.com/user-attachments/assets/54af0526-ae76-455c-877d-e8b7bb7785d4" />
+
+
+---
+
+### ⚡ Meter Reading
+
+![Meter Reading] <img width="1119" height="615" alt="image" src="https://github.com/user-attachments/assets/d3fe33a9-2fd6-4955-8891-942906b1ad02" />
+
+
+---
+
+### 🧾 Bill Generation
+
+![Bill Generation]  <img width="1118" height="610" alt="image" src="https://github.com/user-attachments/assets/fcc7ed83-a8d0-4026-86f2-62d675ed4e80" />
+
+
+---
+
+### 💳 Payment History
+
+![Payment History] <img width="1119" height="609" alt="image" src="https://github.com/user-attachments/assets/38fda384-e1d0-44a5-bcd5-5a4a1876e8cb" />
+
 
 ---
 
