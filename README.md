@@ -10,6 +10,16 @@ The Electricity Billing System is designed to automate the workflow of electrici
 
 ---
 
+## 🔗 Project Links
+
+🌐 **Live Demo:** [Open Website](https://electricity-billing-ui.vercel.app/)
+
+💻 **Frontend Repository:** [electricity-billing-ui](https://github.com/seven-mills04/electricity-billing-ui)
+
+⚙️ **Backend Repository:** [Electricity-Billing-System](https://github.com/seven-mills04/Electricity-Billing-System)
+
+---
+
 ## 🚀 Features
 
 ### 👨‍💼 Admin Portal
